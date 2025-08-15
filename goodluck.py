@@ -10,7 +10,7 @@ SAVE_FILE = "progress.json"
 # Initialize rarities: each rarity 3x rarer than the previous
 rarities = []
 base_chance = 0.5  # Example starting chance for rarity 1
-for i in range(1, 101):
+for i in range(1, 1001):
     rarities.append({
         "name": f"Rarity {i}",
         "base_chance": base_chance,
@@ -75,10 +75,10 @@ def reset_best():
     lp_gain = best - 1
     progress["lp"] += lp_gain
     # Prestige boosts
-    if best >= 15:
+    if best >= 10:
         pp_gain = math.ceil(best ** 0.5)
         progress["pp"] += pp_gain
-    if best >= 30:
+    if best >= 20:
         tp_gain = math.ceil((best ** 0.75) + 1)
         progress["tp"] += tp_gain
     # Reset best rarity
@@ -126,3 +126,4 @@ root.bind("<Key>", key_press)
 
 update_display()
 root.mainloop()
+
