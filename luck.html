@@ -1,0 +1,73 @@
+import { useState, useEffect } from 'react'
+import { Button } from "/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "/components/ui/card"
+import { Star, Zap, Gem, Crown, TrendingUp, Gift } from "lucide-react"
+
+interface Rarity {
+  name: string
+  chance: number
+  color: string
+  lpReward: number
+  ppReward: number
+  tpReward: number
+}
+
+const rarities: Rarity[] = [
+  { name: "Common", chance: 50, color: "text-gray-600", lpReward: 1, ppReward: 0, tpReward: 0 },
+  { name: "Uncommon", chance: 25, color: "text-green-600", lpReward: 5, ppReward: 0, tpReward: 0 },
+  { name: "Rare", chance: 15, color: "text-blue-600", lpReward: 25, ppReward: 1, tpReward: 0 },
+  { name: "Epic", chance: 7, color: "text-purple-600", lpReward: 125, ppReward: 5, tpReward: 0 },
+  { name: "Legendary", chance: 2.5, color: "text-orange-600", lpReward: 625, ppReward: 25, tpReward: 1 },
+  { name: "Mythic", chance: 0.5, color: "text-red-600", lpReward: 3125, ppReward: 125, tpReward: 5 }
+]
+
+export default function LuckSimulator() {
+  const [currentRarity, setCurrentRarity] = useState<Rarity>(rarities[0])
+  const [luckPoints, setLuckPoints] = useState(0)
+  const [prestigePoints, setPrestigePoints] = useState(0)
+  const [transcendentPoints, setTranscendentPoints] = useState(0)
+  const [luckMultiplier, setLuckMultiplier] = useState(1)
+  const [lpMultiplier, setLpMultiplier] = useState(1)
+  const [ppMultiplier, setPpMultiplier] = useState(1)
+  const [totalRolls, setTotalRolls] = useState(0)
+  const [lastSkip, setLastSkip] = useState(false)
+  const [rollHistory, setRollHistory] = useState<string[]>([])
+
+  const rollRarity = () => {
+    setTotalRolls(prev => prev + 1)
+    
+    // Lucky Skip (1% chance)
+    if (Math.random() < 0.01) {
+      setLastSkip(true)
+      setRollHistory(prev => [`🍀 Lucky Skip! Skipped this roll`, ...prev.slice(0, 4)])
+      return
+    }
+    
+    setLastSkip(false)
+    
+    // Calculate weighted chances with luck multiplier
+    const totalWeight = rarities.reduce((sum, rarity) => {
+      return sum + (rarity.chance * luckMultiplier)
+    }, 0)
+    
+    let random = Math.random() * totalWeight
+    let selectedRarity = rarities[0]
+    
+    for (const rarity of rarities) {
+      random -= rarity.chance * luckMultiplier
+      if (random <= 0) {
+        selectedRarity = rarity
+        break
+      }
+    }
+    
+    setCurrentRarity(selectedRarity)
+    
+    // Award points with multipliers
+    const lpGained = Math.floor(selectedRarity.lpReward * lpMultiplier)
+    const ppGained = Math.floor(selectedRarity.ppReward * ppMultiplier)
+    const tpGained = selectedRarity.tpReward
+    
+    setLuckPoints(prev => prev + lpGained)
+    setPrestigePoints(prev => prev + ppGained)
+    setTranscendentPoints(prev
