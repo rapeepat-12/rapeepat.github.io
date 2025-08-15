@@ -1,7 +1,5 @@
-import { useState, useEffect } from 'react'
-import { Button } from "/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "/components/ui/card"
-import { Star, Zap, Gem, Crown, TrendingUp, Gift } from "lucide-react"
+import { useState } from 'react'
+import { Button } from 'lucide-react'
 
 interface Rarity {
   name: string
@@ -21,7 +19,7 @@ const rarities: Rarity[] = [
   { name: "Mythic", chance: 0.5, color: "text-red-600", lpReward: 3125, ppReward: 125, tpReward: 5 }
 ]
 
-export default function LuckSimulator() {
+export default function Home() {
   const [currentRarity, setCurrentRarity] = useState<Rarity>(rarities[0])
   const [luckPoints, setLuckPoints] = useState(0)
   const [prestigePoints, setPrestigePoints] = useState(0)
@@ -35,24 +33,21 @@ export default function LuckSimulator() {
 
   const rollRarity = () => {
     setTotalRolls(prev => prev + 1)
-    
+
     // Lucky Skip (1% chance)
     if (Math.random() < 0.01) {
       setLastSkip(true)
       setRollHistory(prev => [`🍀 Lucky Skip! Skipped this roll`, ...prev.slice(0, 4)])
       return
     }
-    
+
     setLastSkip(false)
-    
-    // Calculate weighted chances with luck multiplier
-    const totalWeight = rarities.reduce((sum, rarity) => {
-      return sum + (rarity.chance * luckMultiplier)
-    }, 0)
-    
+
+    // Weighted chance calculation
+    const totalWeight = rarities.reduce((sum, r) => sum + r.chance * luckMultiplier, 0)
     let random = Math.random() * totalWeight
     let selectedRarity = rarities[0]
-    
+
     for (const rarity of rarities) {
       random -= rarity.chance * luckMultiplier
       if (random <= 0) {
@@ -60,14 +55,47 @@ export default function LuckSimulator() {
         break
       }
     }
-    
+
     setCurrentRarity(selectedRarity)
-    
-    // Award points with multipliers
+
     const lpGained = Math.floor(selectedRarity.lpReward * lpMultiplier)
     const ppGained = Math.floor(selectedRarity.ppReward * ppMultiplier)
     const tpGained = selectedRarity.tpReward
-    
+
     setLuckPoints(prev => prev + lpGained)
     setPrestigePoints(prev => prev + ppGained)
-    setTranscendentPoints(prev
+    setTranscendentPoints(prev => prev + tpGained)
+
+    setRollHistory(prev => [`Rolled ${selectedRarity.name}`, ...prev.slice(0, 4)])
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-4">
+      <div className="bg-white p-6 rounded-xl shadow-lg w-full max-w-md">
+        <h1 className="text-2xl font-bold mb-2 text-center">Luck Simulator</h1>
+        <p className="text-center mb-4 text-gray-600">Roll to earn points and get rarities!</p>
+
+        <div className="mb-4 space-y-1">
+          <p>Current Rarity: <span className={currentRarity.color}>{currentRarity.name}</span></p>
+          <p>Luck Points: {luckPoints}</p>
+          <p>Prestige Points: {prestigePoints}</p>
+          <p>Transcendent Points: {transcendentPoints}</p>
+        </div>
+
+        <button
+          className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded w-full"
+          onClick={rollRarity}
+        >
+          Roll!
+        </button>
+
+        <div className="mt-4">
+          <h4 className="font-semibold mb-1">Roll History</h4>
+          <ul className="list-disc list-inside space-y-1">
+            {rollHistory.map((roll, i) => <li key={i}>{roll}</li>)}
+          </ul>
+        </div>
+      </div>
+    </div>
+  )
+}
